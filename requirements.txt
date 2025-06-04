@@ -1,5 +1,7 @@
 transformers
-diffusers==0.31.0
+diffusers==0.33.1
+torch==2.6.0
+https://github.com/mit-han-lab/nunchaku/releases/download/v0.3.0/nunchaku-0.3.0+torch2.6-cp311-cp311-linux_x86_64.whl
 peft==0.15.2
 opencv-python
 protobuf

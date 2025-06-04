@@ -10,6 +10,11 @@ from flux.condition import Condition
 from flux.generate import generate
 from flux.lora_controller import set_lora_scale
 
+from nunchaku import NunchakuFluxTransformer2dModel, NunchakuT5EncoderModel
+from nunchaku.utils import get_precision
+
+precision = get_precision()  # auto-detect your precision is 'int4' or 'fp4' based on your GPU
+
 pipe = None
 use_int8 = False
 model_config = { "union_cond_attn": True, "add_cond_attn": False, "latent_lora": False, "independent_condition": False}
@@ -20,20 +25,26 @@ def get_gpu_memory():
 
 def init_pipeline():
     global pipe
+    text_encoder_2 = NunchakuT5EncoderModel.from_pretrained(
+        "mit-han-lab/nunchaku-t5/awq-int4-flux.1-t5xxl.safetensors")
     if use_int8 or get_gpu_memory() < 33:
-        transformer_model = FluxTransformer2DModel.from_pretrained(
-            "sayakpaul/flux.1-schell-int8wo-improved",
-            torch_dtype=torch.bfloat16,
-            use_safetensors=False,
+        # transformer_model = FluxTransformer2DModel.from_pretrained(
+        #     "sayakpaul/flux.1-schell-int8wo-improved",
+        #     torch_dtype=torch.bfloat16,
+        #     use_safetensors=False,
+        # )
+        transformer = NunchakuFluxTransformer2dModel.from_pretrained(
+            f"mit-han-lab/nunchaku-flux.1-dev/svdq-{precision}_r32-flux.1-dev.safetensors"
         )
         pipe = FluxPipeline.from_pretrained(
             "black-forest-labs/FLUX.1-schnell",
-            transformer=transformer_model,
+            transformer=transformer,
             torch_dtype=torch.bfloat16,
+            text_encoder_2=text_encoder_2
         )
     else:
         pipe = FluxPipeline.from_pretrained(
-            "black-forest-labs/FLUX.1-schnell", torch_dtype=torch.bfloat16
+            "black-forest-labs/FLUX.1-schnell", torch_dtype=torch.bfloat16, text_encoder_2=text_encoder_2
         )
     pipe = pipe.to("cuda")
     
@@ -122,5 +133,5 @@ if __name__ == "__main__":
     init_pipeline()
     demo.launch(
         debug=True,
-        # share=True
+        share=True
     )
