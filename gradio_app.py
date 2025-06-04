@@ -50,9 +50,12 @@ def init_pipeline():
     pipe = pipe.to("cuda")
     
     # Optional: Load additional LoRA weights, put the loaded weigths here!
-    pipe.load_lora_weights("weights/zen2con_1440_17000/pytorch_lora_weights.safetensors",
-        adapter_name="subject")
-    pipe.set_adapters(["subject"])
+    #pipe.load_lora_weights("weights/zen2con_1440_17000/pytorch_lora_weights.safetensors", adapter_name="subject")
+    #pipe.set_adapters(["subject"])
+    transformer.update_lora_params(
+        "weights/zen2con_1440_17000.safetensors"
+    )  # Path to your LoRA safetensors, can also be a remote HuggingFace path
+    transformer.set_lora_strength(3)  # Your LoRA strength here
     
 def paste_on_white_background(image: Image.Image) -> Image.Image:
     """
@@ -86,18 +89,18 @@ def process_image_and_text(image, text, steps=8, strength_sub=1.0, strength_spat
     if pipe is None:
         init_pipeline()
     
-    with set_lora_scale(["subject"], scale=3.0):
-        result_img = generate(
-            pipe,
-            prompt=text.strip(),
-            conditions=[condition0, condition1],
-            num_inference_steps=steps,
-            height=1024,
-            width=1024,
-            condition_scale = [strength_sub,strength_spat],
-            model_config=model_config,
-            default_lora=True,
-        ).images[0]
+    #with set_lora_scale(["subject"], scale=3.0):
+    result_img = generate(
+        pipe,
+        prompt=text.strip(),
+        conditions=[condition0, condition1],
+        num_inference_steps=steps,
+        height=1024,
+        width=1024,
+        condition_scale = [strength_sub,strength_spat],
+        model_config=model_config,
+        default_lora=True,
+    ).images[0]
 
     return [condition0.condition, condition1.condition, result_img]
 
