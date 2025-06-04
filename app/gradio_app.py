@@ -1,6 +1,7 @@
 # Recycled from Ominicontrol 
 
 import gradio as gr
+import os
 import torch
 from PIL import Image
 from diffusers.pipelines import FluxPipeline
@@ -40,7 +41,8 @@ def init_pipeline():
             "black-forest-labs/FLUX.1-schnell",
             transformer=transformer,
             torch_dtype=torch.bfloat16,
-            text_encoder_2=text_encoder_2
+            text_encoder_2=text_encoder_2,
+            token=os.environ["HF_TOKEN"]
         )
     else:
         pipe = FluxPipeline.from_pretrained(
