@@ -5,14 +5,13 @@ import os
 import torch
 from PIL import Image
 from diffusers.pipelines import FluxPipeline
-from diffusers import FluxTransformer2DModel
+
+from nunchaku import NunchakuFluxTransformer2dModel, NunchakuT5EncoderModel
+from nunchaku.utils import get_precision
 
 from flux.condition import Condition
 from flux.generate import generate
 from flux.lora_controller import set_lora_scale
-
-from nunchaku import NunchakuFluxTransformer2dModel, NunchakuT5EncoderModel
-from nunchaku.utils import get_precision
 
 precision = get_precision()  # auto-detect your precision is 'int4' or 'fp4' based on your GPU
 
